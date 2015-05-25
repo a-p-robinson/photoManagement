@@ -21,8 +21,14 @@ def photoDate(f):
 
 ###################### Main program ########################
 
+# Get the command line argumnet for directory to process
+print "Will process", sys.argv[1]
+
 # Where the photos are and where they're going.
-sourceDir = os.environ['HOME'] + '/Dropbox/Camera Uploads'
+#sourceDir = os.environ['HOME'] + '/Dropbox/Camera Uploads'
+sourceDir = sys.argv[1]
+
+# Where the photos are going
 destDir = os.environ['HOME'] + '/Dropbox/Photos'
 errorDir = destDir + '/Unsorted/'
 
@@ -33,8 +39,8 @@ fmt = "%Y-%m-%d_%H-%M-%S"
 problems = []
 
 # Get all the JPEGs in the source folder.
-photos = os.listdir(sourceDir)
-photos = [ x for x in photos if x[-4:] == '.jpg' or x[-4:] == '.JPG' ]
+#photos = os.listdir(sourceDir)
+#photos = [ x for x in photos if x[-4:] == '.jpg' or x[-4:] == '.JPG' ]
 
 # Prepare to output as processing occurs
 lastMonth = 0
@@ -49,46 +55,49 @@ if not os.path.exists(errorDir):
 # Copy photos into year and month subfolders. Name the copies according to
 # their timestamps. If more than one photo has the same timestamp, add
 # suffixes 'a', 'b', etc. to the names. 
-for photo in photos:
 
-  print "Processing %s..." % photo
-  original = sourceDir + '/' + photo
+#for photo in photos:
+# Walk the sub directories as well
+for root, dirs, photos in os.walk(sourceDir):
+    for photo in photos:
+        if photo.endswith(".jpg") or photo.endswith(".JPG"):
 
-  # # See if we can get the creation date from EXIF
-  # pDate = Image.open(original)._getexif()[36867]
-  # print pDate
-  # print datetime.strptime(pDate, "%Y:%m:%d %H:%M:%S")
+          # We need to get the full path to the sub directory
+          fullpath = os.path.join(root, photo)
 
-  suffix = 'a'
-  try:
-    pDate = photoDate(original)
-    yr = pDate.year
-    mo = pDate.month
-
-    if not lastYear == yr or not lastMonth == mo:
-      sys.stdout.write('\nProcessing %04d-%02d...' % (yr, mo))
-      lastMonth = mo
-      lastYear = yr
-    else:
-      sys.stdout.write('.')
-    
-    newname = pDate.strftime(fmt)
-    thisDestDir = destDir + '/%04d/%02d' % (yr, mo)
-    if not os.path.exists(thisDestDir):
-      os.makedirs(thisDestDir)
-
-    duplicate = thisDestDir + '/%s.jpg' % (newname)
-    while os.path.exists(duplicate):
-      newname = pDate.strftime(fmt) + suffix
-      duplicate = destDir + '/%04d/%02d/%s.jpg' % (yr, mo, newname)
-      suffix = chr(ord(suffix) + 1)
-    shutil.copy2(original, duplicate)
-  except Exception:
-    shutil.copy2(original, errorDir + photo)
-    problems.append(photo)
-  except:
-    sys.exit("Execution stopped.")
-
+          print "Processing %s..." % fullpath
+#          original = sourceDir + '/' + photo
+          original = fullpath
+          suffix = 'a'
+          try:
+            pDate = photoDate(original)
+            yr = pDate.year
+            mo = pDate.month
+            
+            if not lastYear == yr or not lastMonth == mo:
+              sys.stdout.write('\nProcessing %04d-%02d...' % (yr, mo))
+              lastMonth = mo
+              lastYear = yr
+            else:
+              sys.stdout.write('.')
+              
+            newname = pDate.strftime(fmt)
+            thisDestDir = destDir + '/%04d/%02d' % (yr, mo)
+            if not os.path.exists(thisDestDir):
+              os.makedirs(thisDestDir)
+              
+            duplicate = thisDestDir + '/%s.jpg' % (newname)
+            while os.path.exists(duplicate):
+              newname = pDate.strftime(fmt) + suffix
+              duplicate = destDir + '/%04d/%02d/%s.jpg' % (yr, mo, newname)
+              suffix = chr(ord(suffix) + 1)
+            shutil.copy2(original, duplicate)
+          except Exception:
+            shutil.copy2(original, errorDir + photo)
+            problems.append(photo)
+          except:
+            sys.exit("Execution stopped.")
+                  
 # Report the problem files, if any.
 if len(problems) > 0:
   print "\nProblem files:"
