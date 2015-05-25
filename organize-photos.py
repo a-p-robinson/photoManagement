@@ -5,26 +5,29 @@ import os, shutil
 import subprocess
 import os.path
 from datetime import datetime
+from PIL import Image
 
 ######################## Functions #########################
 
 def photoDate(f):
   "Return the date/time on which the given photo was taken."
-
-  cDate = subprocess.check_output(['sips', '-g', 'creation', f])
-  cDate = cDate.split('\n')[1].lstrip().split(': ')[1]
+  
+  # Edited to use PIL ibrary instead of OSX crap!
+  
+  #cDate = subprocess.check_output(['sips', '-g', 'creation', f])
+  #cDate = cDate.split('\n')[1].lstrip().split(': ')[1]
+  cDate = Image.open(original)._getexif()[36867]
   return datetime.strptime(cDate, "%Y:%m:%d %H:%M:%S")
-
 
 ###################### Main program ########################
 
 # Where the photos are and where they're going.
-sourceDir = os.environ['HOME'] + '/Pictures/iPhone Incoming'
-destDir = os.environ['HOME'] + '/Pictures/iPhone'
+sourceDir = os.environ['HOME'] + '/Dropbox/Camera Uploads'
+destDir = os.environ['HOME'] + '/Dropbox/Photos'
 errorDir = destDir + '/Unsorted/'
 
 # The format for the new file names.
-fmt = "%Y-%m-%d %H-%M-%S"
+fmt = "%Y-%m-%d_%H-%M-%S"
 
 # The problem files.
 problems = []
@@ -47,8 +50,15 @@ if not os.path.exists(errorDir):
 # their timestamps. If more than one photo has the same timestamp, add
 # suffixes 'a', 'b', etc. to the names. 
 for photo in photos:
-  # print "Processing %s..." % photo
+
+  print "Processing %s..." % photo
   original = sourceDir + '/' + photo
+
+  # # See if we can get the creation date from EXIF
+  # pDate = Image.open(original)._getexif()[36867]
+  # print pDate
+  # print datetime.strptime(pDate, "%Y:%m:%d %H:%M:%S")
+
   suffix = 'a'
   try:
     pDate = photoDate(original)
