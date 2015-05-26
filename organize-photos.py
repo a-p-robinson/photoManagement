@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import sys
 import os, shutil
 import subprocess
@@ -7,40 +6,42 @@ import os.path
 from datetime import datetime
 from PIL import Image
 
-######################## Functions #########################
-
-def photoDate(f):
-  "Return the date/time on which the given photo was taken."
-  
-  # Edited to use PIL ibrary instead of OSX crap!
-  
-  #cDate = subprocess.check_output(['sips', '-g', 'creation', f])
-  #cDate = cDate.split('\n')[1].lstrip().split(': ')[1]
-  cDate = Image.open(original)._getexif()[36867]
-  return datetime.strptime(cDate, "%Y:%m:%d %H:%M:%S")
-
-###################### Main program ########################
-
-# Get the command line argumnet for directory to process
-print "Will process", sys.argv[1]
-
-# Where the photos are and where they're going.
-#sourceDir = os.environ['HOME'] + '/Dropbox/Camera Uploads'
-sourceDir = sys.argv[1]
-
-# Where the photos are going
-destDir = os.environ['HOME'] + '/Dropbox/Photos'
+######################## Variables #########################
+# Where to put the new files
+#destDir = os.environ['HOME'] + '/Dropbox/Photos'
+destDir = '/data/Photos'
 errorDir = destDir + '/Unsorted/'
 
 # The format for the new file names.
 fmt = "%Y-%m-%d_%H-%M-%S"
 
-# The problem files.
-problems = []
+# File extensions to process
+extensionsToProcess = ('.jpg', '.JPG')
 
-# Get all the JPEGs in the source folder.
-#photos = os.listdir(sourceDir)
-#photos = [ x for x in photos if x[-4:] == '.jpg' or x[-4:] == '.JPG' ]
+######################## Functions #########################
+
+def photoDate(f):
+  "Return the date/time on which the given photo was taken."
+  
+  # Edited to use PIL ibrary instead of OSX crap!  
+  #cDate = subprocess.check_output(['sips', '-g', 'creation', f])
+  #cDate = cDate.split('\n')[1].lstrip().split(': ')[1]
+
+  cDate = Image.open(original)._getexif()[36867]
+  return datetime.strptime(cDate, "%Y:%m:%d %H:%M:%S")
+
+###################### Main program ########################
+
+# Check that we have supplied a path to process
+if len(sys.argv) != 2:
+  print "Usage: python %s /path/to/process" % sys.argv[0]
+  sys.exit()
+
+print "Will process: ", sys.argv[1]
+sourceDir = sys.argv[1]
+
+# List of problem files
+problems = []
 
 # Prepare to output as processing occurs
 lastMonth = 0
@@ -55,18 +56,15 @@ if not os.path.exists(errorDir):
 # Copy photos into year and month subfolders. Name the copies according to
 # their timestamps. If more than one photo has the same timestamp, add
 # suffixes 'a', 'b', etc. to the names. 
-
-#for photo in photos:
-# Walk the sub directories as well
 for root, dirs, photos in os.walk(sourceDir):
     for photo in photos:
-        if photo.endswith(".jpg") or photo.endswith(".JPG"):
+        if photo.endswith(extensionsToProcess):
 
           # We need to get the full path to the sub directory
           fullpath = os.path.join(root, photo)
 
-          print "Processing %s..." % fullpath
-#          original = sourceDir + '/' + photo
+#          print "Processing %s..." % fullpath
+
           original = fullpath
           suffix = 'a'
           try:
