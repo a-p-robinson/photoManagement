@@ -9,7 +9,8 @@ from PIL import Image
 ######################## Variables #########################
 # Where to put the new files
 #destDir = os.environ['HOME'] + '/Dropbox/Photos'
-destDir = '/data/Photos'
+#destDir = '/data/Photos'
+destDir = '/data/p3'
 errorDir = destDir + '/Unsorted/'
 
 # The format for the new file names.
@@ -23,11 +24,19 @@ extensionsToProcess = ('.jpg', '.JPG')
 def photoDate(f):
   "Return the date/time on which the given photo was taken."
   
-  # Edited to use PIL ibrary instead of OSX crap!  
-  #cDate = subprocess.check_output(['sips', '-g', 'creation', f])
-  #cDate = cDate.split('\n')[1].lstrip().split(': ')[1]
+  # Get the exif data
+  exif =  Image.open(original)._getexif()
 
-  cDate = Image.open(original)._getexif()[36867]
+  # First we will try to use [36867 Date/Time Original]
+  if 36867 in exif.keys():
+    print "36867"
+    cDate = exif[36867]
+
+  # Otherwise use [306 Modify Date] (for older cameras ?)
+  elif 306 in exif.keys():
+    print "306"
+    cDate = exif[306]
+
   return datetime.strptime(cDate, "%Y:%m:%d %H:%M:%S")
 
 ###################### Main program ########################
