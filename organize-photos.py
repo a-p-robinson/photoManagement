@@ -3,6 +3,7 @@ import sys
 import os, shutil
 import subprocess
 import os.path
+import argparse
 from datetime import datetime
 from PIL import Image
 
@@ -10,7 +11,7 @@ from PIL import Image
 # Where to put the new files
 #destDir = os.environ['HOME'] + '/Dropbox/Photos'
 #destDir = '/data/Photos'
-destDir = '/data/p3'
+destDir = '/data/test'
 errorDir = destDir + '/Unsorted/'
 
 # The format for the new file names.
@@ -29,25 +30,29 @@ def photoDate(f):
 
   # First we will try to use [36867 Date/Time Original]
   if 36867 in exif.keys():
-    print "36867"
+    #print "36867"
     cDate = exif[36867]
 
   # Otherwise use [306 Modify Date] (for older cameras ?)
   elif 306 in exif.keys():
-    print "306"
+    #print "306"
     cDate = exif[306]
 
   return datetime.strptime(cDate, "%Y:%m:%d %H:%M:%S")
 
 ###################### Main program ########################
 
-# Check that we have supplied a path to process
-if len(sys.argv) != 2:
-  print "Usage: python %s /path/to/process" % sys.argv[0]
-  sys.exit()
+# Define the arguments we want (and optional arguments)
+parser = argparse.ArgumentParser()
+parser.add_argument("pathString", help="Path to Process")
+parser.add_argument("-m", "--move", help="Move the files (default = copy)", action="store_true")
+args = parser.parse_args()
 
-print "Will process: ", sys.argv[1]
-sourceDir = sys.argv[1]
+if args.move:
+    print "Will MOVE files"
+
+print "Will process: ", args.pathString
+sourceDir = args.pathString
 
 # List of problem files
 problems = []
@@ -98,10 +103,19 @@ for root, dirs, photos in os.walk(sourceDir):
               newname = pDate.strftime(fmt) + suffix
               duplicate = destDir + '/%04d/%02d/%s.jpg' % (yr, mo, newname)
               suffix = chr(ord(suffix) + 1)
-            shutil.copy2(original, duplicate)
+              print "shoudl I move?"
+              if args.move:
+                print "MOVING"
+                shutil.move(original, duplicate)
+              else:
+                shutil.copy2(original, duplicate)
           except Exception:
-            shutil.copy2(original, errorDir + photo)
-            problems.append(photo)
+            if args.move:
+              shutil.move(original, duplicate)
+              problems.append(photo)
+            else:
+              shutil.copy2(original, duplicate)
+              problems.append(photo)
           except:
             sys.exit("Execution stopped.")
                   
