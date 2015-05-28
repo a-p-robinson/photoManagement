@@ -76,16 +76,15 @@ for root, dirs, photos in os.walk(sourceDir):
 
           # We need to get the full path to the sub directory
           fullpath = os.path.join(root, photo)
-
-#          print "Processing %s..." % fullpath
-
           original = fullpath
           suffix = 'a'
+
           try:
             pDate = photoDate(original)
             yr = pDate.year
             mo = pDate.month
             
+            # Show the progress as we move to a new month or year
             if not lastYear == yr or not lastMonth == mo:
               sys.stdout.write('\nProcessing %04d-%02d...' % (yr, mo))
               lastMonth = mo
@@ -93,22 +92,26 @@ for root, dirs, photos in os.walk(sourceDir):
             else:
               sys.stdout.write('.')
               
+            # Get the new destination filename and create directory
             newname = pDate.strftime(fmt)
             thisDestDir = destDir + '/%04d/%02d' % (yr, mo)
             if not os.path.exists(thisDestDir):
               os.makedirs(thisDestDir)
-              
-            duplicate = thisDestDir + '/%s.jpg' % (newname)
+
+            duplicate = thisDestDir + '/%s.jpg' % (newname) # This needs fixing !!!!!!!!
+
+            # Fix identical timestamps with a suffix
             while os.path.exists(duplicate):
               newname = pDate.strftime(fmt) + suffix
               duplicate = destDir + '/%04d/%02d/%s.jpg' % (yr, mo, newname)
               suffix = chr(ord(suffix) + 1)
-              print "shoudl I move?"
-              if args.move:
-                print "MOVING"
-                shutil.move(original, duplicate)
-              else:
-                shutil.copy2(original, duplicate)
+              
+            # Copy or Move the files
+            if args.move:
+              shutil.move(original, duplicate)
+            else:
+              shutil.copy2(original, duplicate)
+
           except Exception:
             if args.move:
               shutil.move(original, duplicate)
