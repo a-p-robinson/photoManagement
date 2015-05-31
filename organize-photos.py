@@ -10,7 +10,7 @@ import time
 
 ######################## Variables #########################
 # Where to put the new files
-destDir = '/data/Photos'
+destDir = '/home/apr/Dropbox/Photos/'
 errorDir = destDir + '/Unsorted/'
 
 # The format for the new file names.
