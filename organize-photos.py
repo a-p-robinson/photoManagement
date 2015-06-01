@@ -56,7 +56,7 @@ if args.move:
 if args.dest:
   destDir = args.dest
 
-print "Will copy files to %s" % (args.dest) 
+print "Will copy files to %s" % (destDir)
 print "Will process: ", args.pathString
 sourceDir = args.pathString
 
