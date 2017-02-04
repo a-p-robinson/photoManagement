@@ -27,16 +27,28 @@ def photoDate(f):
   # Get the exif data
   exif =  Image.open(original)._getexif()
 
+  
   # First we will try to use [36867 Date/Time Original]
   if 36867 in exif.keys():
-    #print "36867"
     cDate = exif[36867]
 
+    # Check that we don't have a stupid (> 59 seconds date)
+    new = list(cDate)
+    if new[-2] > 5:
+      new[-2]  = '5'
+      cDate = ''.join(new)
+    
   # Otherwise use [306 Modify Date] (for older cameras ?)
   elif 306 in exif.keys():
-    #print "306"
     cDate = exif[306]
+    print cDate
 
+    # Check that we don't have a stupid (> 59 seconds date)
+    new = list(cDate)
+    if new[-2] > 5:
+      new[-2]  = '5'
+      cDate = ''.join(new)
+     
   return datetime.strptime(cDate, "%Y:%m:%d %H:%M:%S")
 
 ###################### Main program ########################
