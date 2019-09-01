@@ -10,7 +10,7 @@ import time
 
 ######################## Variables #########################
 # Where to put the new files
-destDir = '/home/apr/Dropbox/Photos/'
+destDir = '/raid/apr/Pictures/Photos/'
 errorDir = destDir + '/Unsorted/'
 
 # The format for the new file names.
@@ -133,10 +133,10 @@ for root, dirs, photos in os.walk(sourceDir):
 
           except Exception:
             if args.move:
-              shutil.move(original, duplicate)
+              #shutil.move(original, duplicate)
               problems.append(photo)
             else:
-              shutil.copy2(original, duplicate)
+              #shutil.copy2(original, duplicate)
               problems.append(photo)
           except:
             sys.exit("Execution stopped.")
