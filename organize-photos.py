@@ -10,7 +10,8 @@ import time
 
 ######################## Variables #########################
 # Where to put the new files
-destDir = '/raid/apr/Pictures/Photos/'
+#destDir = '/raid/apr/Pictures/Photos/'
+destDir = '/home/apr/tmp/photos/'
 errorDir = destDir + '/Unsorted/'
 
 # The format for the new file names.
@@ -26,29 +27,28 @@ def photoDate(f):
   
   # Get the exif data
   exif =  Image.open(original)._getexif()
+  #print(exif.keys())
 
-  
   # First we will try to use [36867 Date/Time Original]
   if 36867 in exif.keys():
     cDate = exif[36867]
-
     # Check that we don't have a stupid (> 59 seconds date)
-    new = list(cDate)
-    if new[-2] > 5:
-      new[-2]  = '5'
-      cDate = ''.join(new)
+    # new = list(cDate)
+    # if new[-2] > 5:
+    #   new[-2]  = '5'
+    #   cDate = ''.join(new)
     
   # Otherwise use [306 Modify Date] (for older cameras ?)
   elif 306 in exif.keys():
     cDate = exif[306]
-    print cDate
+    print(cDate)
 
     # Check that we don't have a stupid (> 59 seconds date)
-    new = list(cDate)
-    if new[-2] > 5:
-      new[-2]  = '5'
-      cDate = ''.join(new)
-     
+    # new = list(cDate)
+    # if new[-2] > 5:
+    #   new[-2]  = '5'
+    #   cDate = ''.join(new)
+  
   return datetime.strptime(cDate, "%Y:%m:%d %H:%M:%S")
 
 ###################### Main program ########################
@@ -63,13 +63,13 @@ parser.add_argument("-d", "--dest", help="Set an alternative destination directo
 args = parser.parse_args()
 
 if args.move:
-    print "Will MOVE files"
+    print("Will MOVE files")
 
 if args.dest:
   destDir = args.dest
 
-print "Will copy files to %s" % (destDir)
-print "Will process: ", args.pathString
+print("Will copy files to {}".format(destDir))
+print("Will process: {}".format(args.pathString))
 sourceDir = args.pathString
 
 # List of problem files
@@ -97,9 +97,11 @@ for root, dirs, photos in os.walk(sourceDir):
           original = fullpath
           extension = os.path.splitext(original)[1]
           suffix = 'a'
+          #print("found:{}".format(original))
 
           try:
             pDate = photoDate(original)
+            #print(pDate)
             yr = pDate.year
             mo = pDate.month
             
@@ -143,6 +145,6 @@ for root, dirs, photos in os.walk(sourceDir):
                   
 # Report the problem files, if any.
 if len(problems) > 0:
-  print "\nProblem files:"
-  print "\n".join(problems)
-  print "These can be found in: %s" % errorDir
+  print("\nProblem files:")
+  print("\n".join(problems))
+  print("These can be found in: {}".format(errorDir))
