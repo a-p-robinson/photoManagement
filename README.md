@@ -1,3 +1,3 @@
 # Organise-photos
 
-- Organsie photos in foldes based on date stamps
+- Organsie photos in folders based on date stamps
